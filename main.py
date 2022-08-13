@@ -4,7 +4,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, URL
 from flask_sqlalchemy import SQLAlchemy
-import requests
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Cafe and Wifi Website.db'
@@ -81,11 +80,22 @@ def add_cafe():
     return render_template('add.html', form=form)
 
 
-@app.route('/cafes')
+@app.route('/cafes', methods=["GET", "POST"])
 def cafes():
     all_cafes = db.session.query(Cafe).all()
     cafes = [cafe.to_dict() for cafe in all_cafes]
     return render_template('cafes.html', cafes=cafes)
+
+
+@app.route("/delete", methods=["GET", "POST"])
+def delete_cafe():
+    cafe_id = request.args.get("cafe_id")
+    cafe_to_delete = Cafe.query.get(cafe_id)
+    db.session.delete(cafe_to_delete)
+    db.session.commit()
+    return redirect(url_for('cafes'))
+
+
 
 
 if __name__ == '__main__':
